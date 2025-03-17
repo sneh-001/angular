@@ -1,8 +1,4 @@
-node {
-    stage('SCM') {
-        checkout scm
-    }
-    pipeline {
+pipeline {
         agent {
             label('WINDOWS')
         }
