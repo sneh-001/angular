@@ -1,33 +1,33 @@
 pipeline {
-        agent {
-            label('WINDOWS')
-        }
+    agent {
+        label('WINDOWS')
+    }
 
-        stages {
-            stage('Clone') {
-                steps {
-                    bat 'git clone https://github.com/fkoler/angular-qrcode-generator.git'
+    stages {
+        stage('Clone') {
+            steps {
+                bat 'git clone https://github.com/fkoler/angular-qrcode-generator.git'
+            }
+        }
+        stage('Install') {
+            steps {
+                dir('angular-qrcode-generator') {
+                    bat 'npm install'
                 }
             }
-            stage('Install') {
-                steps {
-                    dir('angular-qrcode-generator') {
-                        bat 'npm install'
-                    }
+        }
+        stage('Build') {
+            steps {
+                dir('angular-qrcode-generator') {
+                    bat 'ng build'
                 }
             }
-            stage('Build') {
-                steps {
-                    dir('angular-qrcode-generator') {
-                        bat 'ng build'
-                    }
-                }
-            }
-            stage('Create Zip') {
-                steps {
-                    dir('angular-qrcode-generator') {
-                        script {
-                            def pythonScript = '''
+        }
+        stage('Create Zip') {
+            steps {
+                dir('angular-qrcode-generator') {
+                    script {
+                        def pythonScript = '''
 import os
 import zipfile
 from datetime import datetime
@@ -54,31 +54,30 @@ folder_to_zip = "dist"
 zip_prefix = "angular_build"     
 create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
 '''
-                            writeFile file: 'create_zip.py', text: pythonScript
-                            bat 'python create_zip.py'
-                        }
+                        writeFile file: 'create_zip.py', text: pythonScript
+                        bat 'python create_zip.py'
                     }
                 }
             }
-            stage('Upload to Nexus') {
-                steps {
-                    script {
-                        def timestamp = new Date().format('yyyyMMddHHmmss')
-                        def zipFileName = "angular_build_${timestamp}.zip"
-                        def zipFilePath = "angular-qrcode-generator\\rep\\${zipFileName}"
-                        
-                        dir('angular-qrcode-generator') {
-                            if (fileExists(zipFileName)) {
-                                echo "Zip file created successfully: ${zipFileName}"
-                                
-                                // Output the directory contents for debugging
-                                bat 'dir'
-                                
-                                // Upload the zip file to Nexus repository
-                                bat "curl -u admin:admin --upload-file ${zipFileName} http://192.168.0.81:8081/repository/jenkins/1.0/angular/${zipFileName}"
-                            } else {
-                                error "Zip file not found: ${zipFileName}"
-                            }
+        }
+        stage('Upload to Nexus') {
+            steps {
+                script {
+                    def timestamp = new Date().format('yyyyMMddHHmmss')
+                    def zipFileName = "angular_build_${timestamp}.zip"
+                    def zipFilePath = "angular-qrcode-generator\\rep\\${zipFileName}"
+
+                    dir('angular-qrcode-generator') {
+                        if (fileExists(zipFileName)) {
+                            echo "Zip file created successfully: ${zipFileName}"
+
+                            // Output the directory contents for debugging
+                            bat 'dir'
+
+                            // Upload the zip file to Nexus repository
+                            bat "curl -u admin:admin --upload-file ${zipFileName} http://192.168.0.81:8081/repository/jenkins/1.0/angular/${zipFileName}"
+                        } else {
+                            error "Zip file not found: ${zipFileName}"
                         }
                     }
                 }
