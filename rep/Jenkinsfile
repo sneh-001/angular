@@ -1,11 +1,92 @@
 node {
-  stage('SCM') {
-    checkout scm
-  }
-  stage('SonarQube Analysis') {
-    def scannerHome = tool 'Sonar';
-    withSonarQubeEnv() {
-      sh "${scannerHome}/bin/sonar-scanner"
+    stage('SCM') {
+        checkout scm
     }
-  }
+    pipeline {
+        agent {
+            label('WINDOWS')
+        }
+
+        stages {
+            stage('Clone') {
+                steps {
+                    bat 'git clone https://github.com/fkoler/angular-qrcode-generator.git'
+                }
+            }
+            stage('Install') {
+                steps {
+                    dir('angular-qrcode-generator') {
+                        bat 'npm install'
+                    }
+                }
+            }
+            stage('Build') {
+                steps {
+                    dir('angular-qrcode-generator') {
+                        bat 'ng build'
+                    }
+                }
+            }
+            stage('Create Zip') {
+                steps {
+                    dir('angular-qrcode-generator') {
+                        script {
+                            def pythonScript = '''
+import os
+import zipfile
+from datetime import datetime
+
+def create_zip_from_folder_with_timestamp(folder_path, zip_filename_prefix="archive"):
+    if not os.path.exists(folder_path):
+        print(f"Error: Folder '{folder_path}' not found.")
+        return
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  
+    zip_filename = f"{zip_filename_prefix}_{timestamp}.zip"  
+    try:
+        with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, folder_path)
+                    zipf.write(file_path, arcname)
+
+        print(f"Successfully created zip archive: {zip_filename}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+folder_to_zip = "dist"  
+zip_prefix = "angular_build"     
+create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
+'''
+                            writeFile file: 'create_zip.py', text: pythonScript
+                            bat 'python create_zip.py'
+                        }
+                    }
+                }
+            }
+            stage('Upload to Nexus') {
+                steps {
+                    script {
+                        def timestamp = new Date().format('yyyyMMddHHmmss')
+                        def zipFileName = "angular_build_${timestamp}.zip"
+                        def zipFilePath = "angular-qrcode-generator\\rep\\${zipFileName}"
+                        
+                        dir('angular-qrcode-generator') {
+                            if (fileExists(zipFileName)) {
+                                echo "Zip file created successfully: ${zipFileName}"
+                                
+                                // Output the directory contents for debugging
+                                bat 'dir'
+                                
+                                // Upload the zip file to Nexus repository
+                                bat "curl -u admin:admin --upload-file ${zipFileName} http://192.168.0.81:8081/repository/jenkins/1.0/angular/${zipFileName}"
+                            } else {
+                                error "Zip file not found: ${zipFileName}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
