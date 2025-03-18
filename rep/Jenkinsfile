@@ -27,7 +27,7 @@ pipeline {
         stage('Build') {
             steps {
                 dir('angular-qrcode-generator') {
-                    bat 'ng build --prod'
+                    bat 'ng build '
                 }
             }
         }
