@@ -65,7 +65,7 @@ create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
                 script {
                     def timestamp = new Date().format('yyyyMMddHHmm')  
                     def zipFileName = "angular_build_${timestamp}.zip"
-                    def zipFilePath = "angular-qrcode-generator\\${zipFileName}"
+                    def zipFilePath = "angular-qrcode-generator\\rep\\${zipFileName}"
 
                     dir('angular-qrcode-generator') {
                         if (fileExists(zipFileName)) {
