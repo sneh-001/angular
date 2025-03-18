@@ -19,13 +19,20 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Sonar Scan') {
             steps {
                 dir('angular-qrcode-generator') {
-                    bat 'ng build '
+                    bat 'npx sonar-scanner'
                 }
             }
         }
+      stage ('Build'){
+        steps{
+          dir('angular-qrcode-generator'){
+            bat 'ng build'
+          }
+        }
+      }
 
 
         stage('Create Zip') {
