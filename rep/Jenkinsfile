@@ -85,10 +85,8 @@ create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
         }
        stage('Download Latest Build from Nexus') {
             steps {
-                script {
-                    def downloadUrl = "http://localhost:8081/rest/v1/search/assets/download?sort=name&direction=desc&repository=jenkins&format=raw&group=%2F1.0%2Fangular"
-                    bat "curl -L -o Angular_Build.zip \"${downloadUrl}\""
-                }
+                bat ' curl -L -o Angular_build.zip "http://192.168.0.81:8081/service/rest/v1/search/assets/download?sort=name&repository=jenkins&format=raw&group=%2F1.0%2Fangular" ' 
+
             }
         }
     }
