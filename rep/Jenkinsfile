@@ -3,11 +3,6 @@ pipeline {
         label('WINDOWS')
     }
     
-    environment {
-        SONAR_SCANNER = tool 'SonarScanner'
-        SONAR_HOST_URL = 'http://192.168.0.81:9000'
-        SONAR_TOKEN = credentials('sonar-token')
-    }
 
     stages {
         stage('Clone') {
@@ -32,19 +27,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                dir('angular-qrcode-generator') {
-                    bat '''
-                        ${SONAR_SCANNER}/bin/sonar-scanner ^
-                        -Dsonar.projectKey=angular-qrcode-generator ^
-                        -Dsonar.sources=src ^
-                        -Dsonar.host.url=%SONAR_HOST_URL% ^
-                        -Dsonar.login=%SONAR_TOKEN%
-                    '''
-                }
-            }
-        }
 
         stage('Create Zip') {
             steps {
