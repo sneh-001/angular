@@ -2,7 +2,7 @@ pipeline {
     agent {
         label('WINDOWS')
     }
-
+    
     stages {
         stage('Clone') {
             steps {
@@ -36,8 +36,8 @@ def create_zip_from_folder_with_timestamp(folder_path, zip_filename_prefix="arch
     if not os.path.exists(folder_path):
         print(f"Error: Folder '{folder_path}' not found.")
         return
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  
-    zip_filename = f"{zip_filename_prefix}_{timestamp}.zip"  
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")  # Removed seconds from timestamp
+    zip_filename = f"{zip_filename_prefix}_{timestamp}.zip"
     try:
         with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for root, _, files in os.walk(folder_path):
@@ -50,8 +50,8 @@ def create_zip_from_folder_with_timestamp(folder_path, zip_filename_prefix="arch
     except Exception as e:
         print(f"An error occurred: {e}")
 
-folder_to_zip = "dist"  
-zip_prefix = "angular_build"     
+folder_to_zip = "dist"
+zip_prefix = "angular_build"
 create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
 '''
                         writeFile file: 'create_zip.py', text: pythonScript
@@ -63,17 +63,17 @@ create_zip_from_folder_with_timestamp(folder_to_zip, zip_prefix)
         stage('Upload to Nexus') {
             steps {
                 script {
-                    def timestamp = new Date().format('yyyyMMddHHmmss')
+                    def timestamp = new Date().format('yyyyMMddHHmm')  # Removed seconds from timestamp
                     def zipFileName = "angular_build_${timestamp}.zip"
                     def zipFilePath = "angular-qrcode-generator\\rep\\${zipFileName}"
 
                     dir('angular-qrcode-generator') {
                         if (fileExists(zipFileName)) {
                             echo "Zip file created successfully: ${zipFileName}"
-
+                            
                             // Output the directory contents for debugging
                             bat 'dir'
-
+                            
                             // Upload the zip file to Nexus repository
                             bat "curl -u admin:admin --upload-file ${zipFileName} http://192.168.0.81:8081/repository/jenkins/1.0/angular/${zipFileName}"
                         } else {
