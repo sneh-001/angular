@@ -13,7 +13,7 @@ pipeline {
 
         stage('Install') {
             steps {
-                dir('angular-qrcode-generator') {
+                dir('rep') {
                     bat 'npm install'
                 }
             }
