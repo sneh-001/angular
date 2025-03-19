@@ -19,13 +19,7 @@ pipeline {
             }
         }
 
-        // stage('Sonar Scan') {
-        //     steps {
-        //         dir('rep') {
-        //             bat 'sonar-scanner'
-        //         }
-        //     }
-        // }
+        
       stage ('Build'){
         steps{
           dir('rep'){
