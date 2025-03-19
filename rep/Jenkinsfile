@@ -22,7 +22,7 @@ pipeline {
         stage('Sonar Scan') {
             steps {
                 dir('angular-qrcode-generator') {
-                    bat 'npx sonar-scanner'
+                    bat 'sonar-scanner'
                 }
             }
         }
