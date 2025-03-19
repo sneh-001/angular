@@ -75,7 +75,7 @@ if zip_name:
                     def zipFileName = readFile('rep\\zip_name.txt').trim()
                     def zipFilePath = "rep\\${zipFileName}"
 
-                    dir('angular-qrcode-generator') {
+                    dir('rep') {
                         bat 'dir'
                         if (fileExists(zipFilePath)) {
                             echo "Uploading ${zipFileName} to Nexus..."
