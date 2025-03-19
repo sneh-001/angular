@@ -21,14 +21,14 @@ pipeline {
 
         stage('Sonar Scan') {
             steps {
-                dir('angular-qrcode-generator') {
+                dir('rep') {
                     bat 'sonar-scanner'
                 }
             }
         }
       stage ('Build'){
         steps{
-          dir('angular-qrcode-generator'){
+          dir('rep'){
             bat 'ng build'
           }
         }
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Create Zip') {
             steps {
-                dir('angular-qrcode-generator') {
+                dir('rep') {
                     script {
                         def pythonScript = '''
 import os
@@ -78,8 +78,8 @@ if zip_name:
         stage('Upload to Nexus') {
             steps {
                 script {
-                    def zipFileName = readFile('angular-qrcode-generator\\zip_name.txt').trim()
-                    def zipFilePath = "angular-qrcode-generator\\${zipFileName}"
+                    def zipFileName = readFile('rep\\zip_name.txt').trim()
+                    def zipFilePath = "rep\\${zipFileName}"
 
                     dir('angular-qrcode-generator') {
                         bat 'dir'
